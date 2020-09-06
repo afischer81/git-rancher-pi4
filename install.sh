@@ -7,16 +7,21 @@ function do_build {
 }
 
 function do_install {
-    echo "use the following alias"
-    echo
-    echo "alias git='docker run --rm -it -v \$PWD:/work ${IMAGE} /usr/bin/git'"
-    echo
+    cat > git <<EOF
+docker run --rm -it -v \${PWD}:/work -v \${HOME}/.gitconfig:/home/rancher/.gitconfig -v \${HOME}/.ssh:/home/rancher/.ssh ${IMAGE} /usr/bin/git \$*
+EOF
+    chmod +x git
+    sudo mv git /usr/bin/git
 }
 
 function do_run {
     docker run \
         --rm \
-        -v $PWD:/work \
+        -it \
+        -v $HOME/.gitconfig:/home/rancher/.gitconfig \
+        -v $HOME/.ssh:/home/rancher/.ssh \
+        -v ${PWD}:/work \
+        -w /work \
         ${IMAGE} \
         /usr/bin/git $*
 }
